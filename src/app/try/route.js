@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { fullLists, PuppeteerBlocker, Request } from '@cliqz/adblocker-puppeteer';
 import fetch from 'cross-fetch';
 import { promises as fs } from 'fs';
-import fs from "node:fs";
 import path from "node:path";
 import cfCheck from "@/utils/cfCheck";
 import {
@@ -65,7 +64,7 @@ export async function GET(request) {
     await blocker.enableBlockingInPage(page);
     await page.setUserAgent(userAgent);
     await page.setViewport({ width: 1920, height: 1080 });
-    const preloadFile = fs.readFileSync(
+    const preloadFile = await fs.readFile(
       path.join(process.cwd(), "/src/utils/preload.js"),
       "utf8"
     );
