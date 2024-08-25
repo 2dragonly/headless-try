@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { fullLists, PuppeteerBlocker, Request } from '@cliqz/adblocker-puppeteer';
+import fetch from 'cross-fetch';
+import { promises as fs } from 'fs';
 import fs from "node:fs";
 import path from "node:path";
 import cfCheck from "@/utils/cfCheck";
@@ -8,12 +11,13 @@ import {
   userAgent,
   remoteExecutablePath,
 } from "@/utils/utils";
-
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds (update by 2024-05-10)
 export const dynamic = "force-dynamic";
 
 const chromium = require("@sparticuz/chromium-min");
 const puppeteer = require("puppeteer-core");
+
+let blocker;
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -24,7 +28,19 @@ export async function GET(request) {
       { status: 400 }
     );
   }
-
+  if (!blocker) blocker = await PuppeteerBlocker.fromLists(
+    fetch,
+    fullLists,
+    {
+      enableCompression: true,
+    },
+    {
+      path: 'engine.bin',
+      read: fs.readFile,
+      write: fs.writeFile,
+    },
+  );
+  
   let browser = null;
   try {
     browser = await puppeteer.launch({
@@ -46,6 +62,7 @@ export async function GET(request) {
 
     const pages = await browser.pages();
     const page = pages[0];
+    await blocker.enableBlockingInPage(page);
     await page.setUserAgent(userAgent);
     await page.setViewport({ width: 1920, height: 1080 });
     const preloadFile = fs.readFileSync(
