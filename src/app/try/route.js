@@ -32,20 +32,14 @@ export async function GET(request) {
   }
 
   if (!blocker) {
-    blocker = await PuppeteerBlocker.fromLists(
-      fetch,
-      fullLists,
-      {
-        enableCompression: true,
-      },
+    blocker = await PuppeteerBlocker.fromLists(fetch, fullLists, {enableCompression: true },
       {
         path: path.join("/tmp", "engine.bin"),
         read: fs.readFile,
         write: fs.writeFile,
-      }
-    );
+      });
   }
-  
+
   let browser = null;
   try {
     browser = await puppeteer.launch({
