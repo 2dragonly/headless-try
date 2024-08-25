@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
-import { fullLists, PuppeteerBlocker, Request } from '@cliqz/adblocker-puppeteer';
-import fetch from 'cross-fetch';
-import { promises as fs } from 'fs';
+import {
+  fullLists,
+  PuppeteerBlocker,
+  Request,
+} from "@cliqz/adblocker-puppeteer";
+import fetch from "cross-fetch";
+import { promises as fs } from "fs";
 import path from "node:path";
 import cfCheck from "@/utils/cfCheck";
 import {
@@ -27,19 +31,20 @@ export async function GET(request) {
       { status: 400 }
     );
   }
-  if (!blocker) blocker = await PuppeteerBlocker.fromLists(
-    fetch,
-    fullLists,
-    {
-      enableCompression: true,
-    },
-    {
-      path: 'engine.bin',
-      read: fs.readFile,
-      write: fs.writeFile,
-    },
-  );
-  
+  if (!blocker)
+    blocker = await PuppeteerBlocker.fromLists(
+      fetch,
+      fullLists,
+      {
+        enableCompression: true,
+      },
+      {
+        path: path.join("/tmp", "engine.bin"),
+        read: fs.readFile,
+        write: fs.writeFile,
+      }
+    );
+
   let browser = null;
   try {
     browser = await puppeteer.launch({
@@ -83,7 +88,7 @@ export async function GET(request) {
     headers.set("Content-Type", "image/png");
     headers.set("Content-Length", blob.length.toString());
     headers.set("Cache-Control", "s-maxage=300, stale-while-revalidate");
-    
+
     // or just use new Response ❗️
     return new NextResponse(blob, { status: 200, statusText: "OK", headers });
   } catch (err) {
