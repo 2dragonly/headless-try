@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import {
   fullLists,
   PuppeteerBlocker,
-  Request,
 } from "@cliqz/adblocker-puppeteer";
 import fetch from "cross-fetch";
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import cfCheck from "@/utils/cfCheck";
 import {
@@ -14,12 +13,12 @@ import {
   userAgent,
   remoteExecutablePath,
 } from "@/utils/utils";
+
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds (update by 2024-05-10)
 export const dynamic = "force-dynamic";
 
 const chromium = require("@sparticuz/chromium-min");
 const puppeteer = require("puppeteer-core");
-
 let blocker;
 
 export async function GET(request) {
@@ -31,7 +30,8 @@ export async function GET(request) {
       { status: 400 }
     );
   }
-  if (!blocker)
+
+  if (!blocker) {
     blocker = await PuppeteerBlocker.fromLists(
       fetch,
       fullLists,
@@ -44,7 +44,8 @@ export async function GET(request) {
         write: fs.writeFile,
       }
     );
-
+  }
+  
   let browser = null;
   try {
     browser = await puppeteer.launch({
@@ -87,7 +88,6 @@ export async function GET(request) {
 
     headers.set("Content-Type", "image/png");
     headers.set("Content-Length", blob.length.toString());
-    headers.set("Cache-Control", "s-maxage=300, stale-while-revalidate");
 
     // or just use new Response ❗️
     return new NextResponse(blob, { status: 200, statusText: "OK", headers });
