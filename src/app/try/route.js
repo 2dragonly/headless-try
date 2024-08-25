@@ -66,7 +66,8 @@ export async function GET(request) {
 
     headers.set("Content-Type", "image/png");
     headers.set("Content-Length", blob.length.toString());
-
+    headers.set("Cache-Control", "s-maxage=300, stale-while-revalidate");
+    
     // or just use new Response ❗️
     return new NextResponse(blob, { status: 200, statusText: "OK", headers });
   } catch (err) {
